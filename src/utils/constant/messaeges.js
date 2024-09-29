@@ -19,7 +19,9 @@ export const messages = {
         invalidCredntiols: "invalid Credntiols",
         notVerified: "not Verified",
         loginSuccessfully: "login successfully",
-        unauthorized: "unauthorized to access this api"
+        unauthorized: "unauthorized to access this api",
+        invalidPassword: "invalid password",
+        passwordUpdated: "password updated successfully"
     },
 
 }

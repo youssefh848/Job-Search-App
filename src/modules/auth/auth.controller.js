@@ -5,6 +5,7 @@ import { messages } from "../../utils/constant/messaeges.js"
 import { generateToken, verifyToken } from "../../utils/token.js";
 import { sendEmail } from "../../utils/email.js";
 import { status } from "../../utils/constant/enums.js";
+import { generateOTP, sendOTP } from "../../utils/OTP.js";
 
 // signup
 export const signup = async (req, res, next) => {
@@ -70,7 +71,7 @@ export const login = async (req, res, next) => {
     // check user exist and update status online
     const userExist = await User.findOneAndUpdate(
         { $or: [{ email }, { mobileNumber }, { recoveryEmail }] },
-        { status: 'online' },
+        { status: status.ONLINE },
         { new: true }
     );
     if (!userExist) {
@@ -94,3 +95,18 @@ export const login = async (req, res, next) => {
         token
     })
 }
+
+// forget password
+export const forgotPassword = async (req, res, next) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+        return next(new APPError(messages.user.invalidCredntiols, 401));
+    }
+    const otp = generateOTP(); // Function to generate OTP
+    await sendOTP(user.email, otp); // Send OTP via email
+    user.otp = otp; // Save OTP to user record
+    user.otpExpires = Date.now() + 3600000; // OTP expires in 1 hour
+    await user.save();
+    return res.status(200).json({ message: 'OTP sent to your email', success: true });
+};

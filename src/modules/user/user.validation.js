@@ -11,3 +11,12 @@ export const updateUserVal = joi.object({
     DOB: generalFields.DOB.optional()
 })
 
+export const getProfileVal = joi.object({
+    userId: generalFields.objectId.required()
+})
+
+export const updatePasswordVal = joi.object({
+    oldPassword: generalFields.password.required(),
+    newPassword: generalFields.password.required().not(joi.ref('oldPassword')),
+    cPassword: generalFields.password.required().valid(joi.ref('newPassword'))
+})

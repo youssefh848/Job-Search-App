@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt'
 import { User } from "../../../DB/index.js";
 import { APPError } from "../../utils/appError.js";
 import { messages } from "../../utils/constant/messaeges.js";
@@ -50,3 +51,86 @@ export const updateUser = async (req, res, next) => {
         data: userUpdated
     })
 }
+
+// delete user
+export const deleteUser = async (req, res, next) => {
+    // get data from req 
+    const authUserId = req.authUser._id;
+    // cheke exist and delete 
+    const userdeleted = await User.findByIdAndDelete(authUserId)
+    // handel fail
+    if (!userdeleted) {
+        return next(new APPError(messages.user.failToDelete, 500))
+    }
+    // send res 
+    return res.status(200).json({
+        message: messages.user.deleted,
+        success: true
+    })
+}
+
+// getUser
+export const getUser = async (req, res, next) => {
+    // get data from req
+    const authUserId = req.authUser._id;
+    // check existence
+    const userExist = await User.findById(authUserId)
+    if (!userExist) {
+        return next(new APPError(messages.user.notExist, 404))
+    }
+    // send res 
+    return res.status(200).json({
+        message: messages.user.fetchedSuccessfully,
+        success: true,
+        data: userExist
+    })
+}
+
+// getProfile
+export const getProfile = async (req, res, next) => {
+    // get data from req
+    const { userId } = req.params;
+    // check existence
+    const userExist = await User.findById(userId).select('-password')
+    if (!userExist) {
+        return next(new APPError(messages.user.notExist, 404))
+    }
+    // send res
+    return res.status(200).json({
+        message: messages.user.fetchedSuccessfully,
+        success: true,
+        data: userExist
+    })
+}
+
+// updatePassword
+export const updatePassword = async (req, res, next) => {
+    // get data from req
+    const authUserId = req.authUser._id;
+    const { oldPassword, newPassword } = req.body;
+    // check existence
+    const userExist = await User.findById(authUserId)
+    if (!userExist) {
+        return next(new APPError(messages.user.notExist, 404))
+    }
+    // check old password
+    const isMatch = bcrypt.compareSync(oldPassword, userExist.password)
+    if (!isMatch) {
+        return next(new APPError(messages.user.invalidPassword, 401))
+    }
+    // prepare date
+    const hashedNewPassword = bcrypt.hashSync(newPassword, 10); // Hash the new password
+    userExist.password = hashedNewPassword;
+    // save data
+    const userUpdated = await userExist.save()
+    // handel fail
+    if (!userUpdated) {
+        return next(new APPError(messages.user.updateFailed, 500))
+    }
+    // send res
+    return res.status(200).json({
+        message: messages.user.passwordUpdated,
+        success: true
+    })
+}
+

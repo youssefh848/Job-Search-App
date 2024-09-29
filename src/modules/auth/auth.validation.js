@@ -18,3 +18,7 @@ export const loginVal = joi.object({
     recoveryEmail: generalFields.email.optional(),
     password: generalFields.password.required(),
 }).or('email', 'mobileNumber', 'recoveryEmail');
+
+export const forgetPasswordVal = joi.object({
+    email: generalFields.email.required()
+})
