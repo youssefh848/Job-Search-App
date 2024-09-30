@@ -20,7 +20,8 @@ export const generalFields = {
         .message('Date of birth must be in format YYYY-M-D or YYYY-MM-DD'),
     objectId: joi.string().hex().length(24),
     otp: joi.string().length(6),
-    // description: joi.string().max(2000),
+    description: joi.string().max(2000),
+    numberOfEmployees: joi.string().pattern(/^(?:[1-9]\d{0,2})-(?:[1-9]\d{0,2})$/)
     // stock: joi.number().positive(),
     // price: joi.number().positive(),
     // discount: joi.number(),

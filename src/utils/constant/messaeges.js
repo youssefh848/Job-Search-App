@@ -26,5 +26,6 @@ export const messages = {
         failToUpdatePassword: "fail To Update Password",
         noAccountsFound: "no accounts found",
     },
+    company: generateMessage('company')
 
 }
