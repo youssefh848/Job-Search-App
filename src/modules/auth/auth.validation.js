@@ -22,3 +22,10 @@ export const loginVal = joi.object({
 export const forgetPasswordVal = joi.object({
     email: generalFields.email.required()
 })
+
+export const resetPasswordVal = joi.object({
+    email: generalFields.email.required(),
+    otp: generalFields.otp.required(),
+    newPassword: generalFields.password.required(),
+    cPassword: generalFields.password.required().valid(joi.ref('newPassword')).required()
+});

@@ -7,6 +7,9 @@ export const isAuthenticated = () => {
     return async (req, res, next) => {
         // token from headers
         const { token } = req.headers
+        if (!token) {
+            return next(new APPError("token not provided", 401))
+        }
         // decoded token 
         const payload = verifyToken({ token })
         // if token is valid

@@ -110,3 +110,42 @@ export const forgotPassword = async (req, res, next) => {
     await user.save();
     return res.status(200).json({ message: 'OTP sent to your email', success: true });
 };
+
+// reset password
+export const resetPassword = async (req, res, next) => {
+    const { email, otp, newPassword } = req.body;
+
+    // Check if the user exists
+    const user = await User.findOne({ email });
+    if (!user) {
+        return next(new APPError(messages.user.notExist, 404));
+    }
+
+    // Check if the OTP is valid
+    if (user.otp !== otp || Date.now() > user.otpExpires) {
+        return next(new APPError(messages.user.invalidOTP, 400));
+    }
+
+    // Hash the new password
+    const hashedPassword = bcrypt.hashSync(newPassword, 8);
+
+    // Update the user's password
+    user.password = hashedPassword;
+
+    // Clear the OTP and its expiration
+    user.otp = undefined;
+    user.otpExpires = undefined;
+
+    // Save the user with the updated password
+    const updatedUser = await user.save();
+
+    if (!updatedUser) {
+        return next(new APPError(messages.user.failToUpdatePassword, 500));
+    }
+
+    // Send response
+    return res.status(200).json({
+        message: messages.user.passwordUpdated,
+        success: true,
+    });
+};

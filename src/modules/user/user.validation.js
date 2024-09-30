@@ -20,3 +20,7 @@ export const updatePasswordVal = joi.object({
     newPassword: generalFields.password.required().not(joi.ref('oldPassword')),
     cPassword: generalFields.password.required().valid(joi.ref('newPassword'))
 })
+
+export const RrecoveryEmailVal = joi.object({
+    recoveryEmail: generalFields.email.required()
+})

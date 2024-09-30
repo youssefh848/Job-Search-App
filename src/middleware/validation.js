@@ -19,6 +19,7 @@ export const generalFields = {
         .regex(/^\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12][0-9]|3[01])$/)
         .message('Date of birth must be in format YYYY-M-D or YYYY-MM-DD'),
     objectId: joi.string().hex().length(24),
+    otp: joi.string().length(6),
     // description: joi.string().max(2000),
     // stock: joi.number().positive(),
     // price: joi.number().positive(),

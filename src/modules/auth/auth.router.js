@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { isValid } from "../../middleware/validation.js";
-import { forgetPasswordVal, loginVal, signupVal } from "./auth.validation.js";
+import { forgetPasswordVal, loginVal, resetPasswordVal, signupVal } from "./auth.validation.js";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
-import { forgotPassword, login, signup, verifyAccount } from "./auth.controller.js";
+import { forgotPassword, login, resetPassword, signup, verifyAccount } from "./auth.controller.js";
 
 
 const authRouter = Router();
@@ -16,6 +16,11 @@ authRouter.post('/login', isValid(loginVal), asyncHandler(login))
 authRouter.post('/forget-password',
     isValid(forgetPasswordVal),
     asyncHandler(forgotPassword)
+)
+// reset password
+authRouter.post('/reset-password',
+    isValid(resetPasswordVal),
+    asyncHandler(resetPassword)
 )
 
 export default authRouter;

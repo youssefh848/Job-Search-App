@@ -134,3 +134,19 @@ export const updatePassword = async (req, res, next) => {
     })
 }
 
+// Get all accounts associated to a specific recovery Email
+export const getRecoveryEmailAccounts = async (req, res, next) => {
+    // get data from req
+    const { recoveryEmail } = req.params;
+    // check existance
+    const users = await User.find({ recoveryEmail })
+    if (!users.length) {
+        return next(new APPError(messages.user.noAccountsFound, 404));
+    }
+    // send res 
+    return res.status(200).json({
+        message: messages.user.fetchedSuccessfully,
+        success: true,
+        data: users
+    })
+}

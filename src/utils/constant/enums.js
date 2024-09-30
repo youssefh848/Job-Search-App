@@ -1,4 +1,5 @@
 export const roles = {
+    ADMIN: 'admin',
     USER: "user",
     COMPANY_HR: "company_hr"
 }
