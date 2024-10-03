@@ -29,17 +29,6 @@ export const generalFields = {
     seniorityLevel: joi.string().valid(...Object.values(seniorityLevel)),
     technicalSkills: joi.custom(parseArray),
     softSkills: joi.custom(parseArray),
-    // stock: joi.number().positive(),
-    // price: joi.number().positive(),
-    // discount: joi.number(),
-    // sizes: joi.custom(parseArray),
-    // rate: joi.number().min(1).max(5),
-    // comment: joi.string().max(2000),
-    // rate: joi.number().min(1).max(5),
-    // code: joi.string().max(6),
-    // discountAmount: joi.number().positive(),
-    // fromDate: joi.date().greater(Date.now() - 24 * 60 * 60 * 1000),
-    // toDate: joi.date().greater(joi.ref('fromDate'))
 }
 
 export const isValid = (schema) => {

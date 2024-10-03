@@ -154,12 +154,12 @@ export const getApplicationJob = async (req, res, next) => {
     const { jobId } = req.params;
     const userId = req.authUser._id;
     // cheke jobExist
-    const jopExist = await Job.findById(jobId).populate('company')
-    if (!jopExist) {
+    const jobExist = await Job.findById(jobId).populate('company')
+    if (!jobExist) {
         return next(new APPError(messages.job.notExist, 404))
     }
     // ensure that the HR owns this job
-    if (!jopExist.company.companyHR.equals(userId)) {
+    if (!jobExist.company.companyHR.equals(userId)) {
         return next(new APPError(messages.user.unauthorized, 403));
     }
     // all applications for this job

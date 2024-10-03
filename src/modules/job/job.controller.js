@@ -122,6 +122,8 @@ export const deleteJob = async (req, res, next) => {
     if (!jobDeleted) {
         return next(new APPError(messages.job.failToDelete, 500))
     }
+    // Delete related application on this job
+    await Application.deleteMany({ jobId })
     // send res
     return res.status(200).json({
         message: messages.job.deleted,
@@ -167,57 +169,57 @@ export const getJobsByCompany = async (req, res, next) => {
 
 // apply job
 export const applyJob = async (req, res, next) => {
-        // Get data from req 
-        const { jobId } = req.params;
-        const userId = req.authUser._id;
-        const { userTechSkills, userSoftSkills } = req.body;
+    // Get data from req 
+    const { jobId } = req.params;
+    const userId = req.authUser._id;
+    const { userTechSkills, userSoftSkills } = req.body;
 
-        // Check job existence
-        const jobExist = await Job.findById(jobId);
-        if (!jobExist) {
-            return next(new APPError(messages.job.notExist, 404));
-        }
+    // Check job existence
+    const jobExist = await Job.findById(jobId);
+    if (!jobExist) {
+        return next(new APPError(messages.job.notExist, 404));
+    }
 
-        // Check if the user has already applied to this job
-        const userApplied = await Application.findOne({ userId, jobId });
-        if (userApplied) {
-            return next(new APPError(messages.job.alreadyApplied, 400));
-        }
+    // Check if the user has already applied to this job
+    const userApplied = await Application.findOne({ userId, jobId });
+    if (userApplied) {
+        return next(new APPError(messages.job.alreadyApplied, 400));
+    }
 
-        // Upload file
-        if (!req.file) {
-            return next(new APPError(messages.file.required, 400));
-        }
+    // Upload file
+    if (!req.file) {
+        return next(new APPError(messages.file.required, 400));
+    }
 
-        const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
-            folder: '/Job Search App/resume'
-        })
+    const { secure_url, public_id } = await cloudinary.uploader.upload(req.file.path, {
+        folder: '/Job Search App/resume'
+    })
 
-        // Handle upload fail
-        req.failResume = { secure_url, public_id };
+    // Handle upload fail
+    req.failResume = { secure_url, public_id };
 
-        // Prepare data
-        const application = new Application({
-            jobId,
-            userId,
-            userTechSkills: JSON.parse(userTechSkills),
-            userSoftSkills: JSON.parse(userSoftSkills),
-            userResume: { secure_url, public_id }
-        });
+    // Prepare data
+    const application = new Application({
+        jobId,
+        userId,
+        userTechSkills: JSON.parse(userTechSkills),
+        userSoftSkills: JSON.parse(userSoftSkills),
+        userResume: { secure_url, public_id }
+    });
 
-        // Add to db
-        const createdApplication = await application.save();
+    // Add to db
+    const createdApplication = await application.save();
 
-        // Handle fail
-        if (!createdApplication) {
-            return next(new APPError(messages.job.failToApply, 500));
-        }
+    // Handle fail
+    if (!createdApplication) {
+        return next(new APPError(messages.job.failToApply, 500));
+    }
 
-        // Send response
-        return res.status(201).json({
-            message: messages.job.createdApplication,
-            success: true,
-            data: createdApplication
-        })
+    // Send response
+    return res.status(201).json({
+        message: messages.job.createdApplication,
+        success: true,
+        data: createdApplication
+    })
 }
 
