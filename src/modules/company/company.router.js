@@ -4,8 +4,8 @@ import { isAuthorized } from "../../middleware/authorization.js";
 import { roles } from "../../utils/constant/enums.js";
 import { isValid } from "../../middleware/validation.js";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
-import { addCompanyVal, deleteCompanyVal, getApplicationJobVal, getCompanyVal, searchCompanyByNameVal, updateCompanyVal } from "./company.validation.js";
-import { addCompany, deleteCompany, getApplicationJob, getCompany, searchCompanyByName, updateCompany } from "./company.controller.js";
+import { addCompanyVal, deleteCompanyVal, getApplicationJobVal, getApplicationsReportVal, getCompanyVal, searchCompanyByNameVal, updateCompanyVal } from "./company.validation.js";
+import { addCompany, deleteCompany, getApplicationJob, getApplicationsReport, getCompany, searchCompanyByName, updateCompany } from "./company.controller.js";
 
 const companyRouter = Router();
 
@@ -131,6 +131,21 @@ companyRouter.get('/job-applications/:jobId',
     isAuthorized([roles.COMPANY_HR]),
     isValid(getApplicationJobVal),
     asyncHandler(getApplicationJob)
+)
+
+
+/**
+ * @desc Create an Excel sheet containing applications for a specific company on a specific day.
+ * @route GET /report/applications
+ * @access COMPANY_HR
+ * @param {Object} req - Contains company ID and date in query params.
+ * @param {Object} res - Sends the Excel file as a response.
+ */
+companyRouter.get('/applications-report',
+    isAuthenticated(),
+    isAuthorized([roles.COMPANY_HR]),
+    isValid(getApplicationsReportVal),
+    asyncHandler(getApplicationsReport)
 )
 
 export default companyRouter;

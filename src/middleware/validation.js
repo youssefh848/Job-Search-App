@@ -29,6 +29,7 @@ export const generalFields = {
     seniorityLevel: joi.string().valid(...Object.values(seniorityLevel)),
     technicalSkills: joi.custom(parseArray),
     softSkills: joi.custom(parseArray),
+    date: joi.date().iso(),
 }
 
 export const isValid = (schema) => {

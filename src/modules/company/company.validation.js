@@ -36,3 +36,8 @@ export const searchCompanyByNameVal = joi.object({
 export const getApplicationJobVal = joi.object({
     jobId: generalFields.objectId.required()
 })
+
+export const getApplicationsReportVal = joi.object({
+    companyId: generalFields.objectId.required(),
+    date:generalFields.date.required(),
+})

@@ -1,3 +1,4 @@
+import xlsx from 'xlsx';
 import { Application, Company, Job } from "../../../DB/index.js";
 import { APPError } from "../../utils/appError.js";
 import { messages } from "../../utils/constant/messaeges.js";
@@ -174,4 +175,60 @@ export const getApplicationJob = async (req, res, next) => {
         success: true,
         data: applications
     })
+}
+
+// getApplicationsReport
+export const getApplicationsReport = async (req, res, next) => {
+    // get data from req
+    const { companyId, date } = req.query;
+    const userId = req.authUser._id;
+    // Check if company exists
+    const company = await Company.findById(companyId);
+    if (!company) {
+        return next(new APPError(messages.company.notExist, 404));
+    }
+    // check if the user is the owner of the company
+    if (!company.companyHR.equals(userId)) {
+        return next(new APPError(messages.user.unauthorized, 403));
+    }
+    // Fetch jobs for the company
+    const jobs = await Job.find({ company: companyId });
+    if (!jobs.length) {
+        return next(new APPError(messages.job.notExist, 404));
+    }
+
+    // Get all jobIds for the company
+    const jobIds = jobs.map(job => job._id);
+
+    // Fetch applications for the company jobs on the specified day
+    const applications = await Application.find({
+        jobId: { $in: jobIds }, // Match any jobId from the company
+        createdAt: {
+            $gte: new Date(new Date(date).setHours(0, 0, 0, 0)),
+            $lte: new Date(new Date(date).setHours(23, 59, 59, 999))
+        }
+    }).populate('userId', 'firstName lastName email')
+        .populate('jobId', 'jobTitle')
+    // Check if there are applications
+    if (!applications.length) {
+        return next(new APPError('No applications found on the specified day', 404));
+    }
+    // Convert data into a format suitable for Excel
+    const data = applications.map(application => ({
+        'User Name': `${application.userId.firstName} ${application.userId.lastName}`,
+        'Email': application.userId.email,
+        'Applied Job Title': application.jobId.jobTitle,
+        'Application Date': application.createdAt.toDateString(),
+        'User Resume': application.userResume.secure_url
+    }));
+    // Create Excel file using xlsx library
+    const worksheet = xlsx.utils.json_to_sheet(data); // Convert JSON data to a worksheet
+    const workbook = xlsx.utils.book_new(); // Create a new workbook
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Applications'); // Append the worksheet to the workbook
+    // Set response headers
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=applications.xlsx');
+    // Send the file
+    const excelBuffer = xlsx.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+    res.send(excelBuffer);
 }

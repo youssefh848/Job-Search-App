@@ -3,7 +3,7 @@ import multer, { diskStorage } from "multer";
 import { APPError } from './appError.js';
 
 export const fileValidation = {
-    file: ['application/pdf', 'application/msword']
+    file: ['application/pdf']
 }
 
 export const cloudUpload = ({ allowFile = fileValidation.file } = {}) => {
