@@ -13,7 +13,7 @@ const userRouter = Router();
 // update account
 userRouter.put('/update/:userId',
     isAuthenticated(),
-    isAuthorized([roles.USER]),
+    isAuthorized([roles.USER, roles.COMPANY_HR]),
     isValid(updateUserVal),
     asyncHandler(updateUser)
 )
@@ -21,21 +21,21 @@ userRouter.put('/update/:userId',
 // delete account
 userRouter.delete('/delete',
     isAuthenticated(),
-    isAuthorized([roles.USER]),
+    isAuthorized([roles.USER, roles.COMPANY_HR]),
     asyncHandler(deleteUser)
 )
 
 // Get user account data 
 userRouter.get('/',
     isAuthenticated(),
-    isAuthorized([roles.USER]),
+    isAuthorized([roles.USER, roles.COMPANY_HR]),
     asyncHandler(getUser)
 )
 
 // Get profile data for another user 
 userRouter.get('/profile/:userId',
     isAuthenticated(),
-    isAuthorized([roles.USER]),
+    isAuthorized([roles.USER, roles.COMPANY_HR]),
     isValid(getProfileVal),
     asyncHandler(getProfile)
 )
@@ -43,7 +43,7 @@ userRouter.get('/profile/:userId',
 // Update password 
 userRouter.patch('/update-password',
     isAuthenticated(),
-    isAuthorized([roles.USER]),
+    isAuthorized([roles.USER, roles.COMPANY_HR]),
     isValid(updatePasswordVal),
     asyncHandler(updatePassword)
 )
@@ -51,7 +51,7 @@ userRouter.patch('/update-password',
 // Get all accounts associated to a specific recovery Email 
 userRouter.get('/recovery-email/:recoveryEmail',
     isAuthenticated(),
-    isAuthorized([roles.USER]),
+    isAuthorized([roles.USER, roles.COMPANY_HR]),
     isValid(RrecoveryEmailVal),
     asyncHandler(getRecoveryEmailAccounts)
 )

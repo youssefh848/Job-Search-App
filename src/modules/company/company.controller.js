@@ -1,4 +1,4 @@
-import { Company } from "../../../DB/index.js";
+import { Application, Company, Job } from "../../../DB/index.js";
 import { APPError } from "../../utils/appError.js";
 import { messages } from "../../utils/constant/messaeges.js";
 
@@ -7,6 +7,12 @@ export const addCompany = async (req, res, next) => {
     // get data from req
     let { companyName, description, industry, address, numberOfEmployees, companyEmail } = req.body;
     companyName = companyName.toLowerCase()
+    const companyHR = req.authUser._id
+    // check if the user already has a company
+    const existingCompany = await Company.findOne({ companyHR });
+    if (existingCompany) {
+        return next(new APPError(messages.company.userHaveCompany, 409));
+    }
     // check existance
     const companyExist = await Company.findOne({ companyName });
     if (companyExist) {
@@ -20,7 +26,7 @@ export const addCompany = async (req, res, next) => {
         address,
         numberOfEmployees,
         companyEmail,
-        companyHR: req.authUser._id
+        companyHR
     })
     // add to db 
     const createdCompany = await company.save()
@@ -97,6 +103,8 @@ export const deleteCompany = async (req, res, next) => {
     if (!deletedCompany) {
         return next(new APPError(messages.company.failToDelete, 500));
     }
+    // Delete related jobs on this company
+    await Job.deleteMany({ company: companyId });
     // send res
     return res.status(200).json({
         message: messages.company.deleted,
@@ -104,7 +112,7 @@ export const deleteCompany = async (req, res, next) => {
     })
 }
 
-// get Company             todo return all jobs related to this company
+// get Company             
 export const getCompany = async (req, res, next) => {
     // get data from req
     const { companyId } = req.params;
@@ -113,11 +121,13 @@ export const getCompany = async (req, res, next) => {
     if (!companyExist) {
         return next(new APPError(messages.company.notExist, 404))
     }
+    // Get all jobs related to this company
+    const jobs = await Job.find({ company: companyId }).populate('company')
     // send res
     return res.status(200).json({
         message: messages.company.fetchedSuccessfully,
         success: true,
-        data: companyExist
+        data: jobs
     })
 }
 
@@ -135,5 +145,33 @@ export const searchCompanyByName = async (req, res, next) => {
         message: messages.company.fetchedSuccessfully,
         success: true,
         data: companyExist
+    })
+}
+
+// Get all applications for specific Job
+export const getApplicationJob = async (req, res, next) => {
+    // get data from req
+    const { jobId } = req.params;
+    const userId = req.authUser._id;
+    // cheke jobExist
+    const jopExist = await Job.findById(jobId).populate('company')
+    if (!jopExist) {
+        return next(new APPError(messages.job.notExist, 404))
+    }
+    // ensure that the HR owns this job
+    if (!jopExist.company.companyHR.equals(userId)) {
+        return next(new APPError(messages.user.unauthorized, 403));
+    }
+    // all applications for this job
+    const applications = await Application.find({ jobId }).populate('userId', '-password -__v -createdAt -updatedAt')
+    // Check if there are applications
+    if (applications.length === 0) {
+        return next(new APPError(messages.application.notExist, 404))
+    }
+    // send res
+    return res.status(200).json({
+        message: messages.application.fetchedSuccessfully,
+        success: true,
+        data: applications
     })
 }

@@ -1,14 +1,16 @@
 // import modules
 import joi from 'joi';
 import { APPError } from '../utils/appError.js';
+import { jobLcation, seniorityLevel, workingTime } from '../utils/constant/enums.js';
 
-// const parseArray = (value, helper) => {
-//     let data = JSON.parse(value)
-//     let schema = joi.array().items(joi.string())
-//     const { error } = schema.validate(data, { abortEarly: false })
-//     if (error) { return helper(error.details) }
-//     return true
-// }
+const parseArray = (value, helper) => {
+    let data = JSON.parse(value)
+    let schema = joi.array().items(joi.string())
+    const { error } = schema.validate(data, { abortEarly: false })
+    if (error) { return helper(error.details) }
+    return true
+}
+
 export const generalFields = {
     name: joi.string(),
     email: joi.string().email(),
@@ -21,12 +23,15 @@ export const generalFields = {
     objectId: joi.string().hex().length(24),
     otp: joi.string().length(6),
     description: joi.string().max(2000),
-    numberOfEmployees: joi.string().pattern(/^(?:[1-9]\d{0,2})-(?:[1-9]\d{0,2})$/)
+    numberOfEmployees: joi.string().pattern(/^(?:[1-9]\d{0,2})-(?:[1-9]\d{0,2})$/),
+    jobLocation: joi.string().valid(...Object.values(jobLcation)),
+    workingTime: joi.string().valid(...Object.values(workingTime)),
+    seniorityLevel: joi.string().valid(...Object.values(seniorityLevel)),
+    technicalSkills: joi.custom(parseArray),
+    softSkills: joi.custom(parseArray),
     // stock: joi.number().positive(),
     // price: joi.number().positive(),
     // discount: joi.number(),
-    // discountTybe: joi.string().valid(...Object.values(discountTybes)),
-    // colors: joi.custom(parseArray),
     // sizes: joi.custom(parseArray),
     // rate: joi.number().min(1).max(5),
     // comment: joi.string().max(2000),
@@ -44,8 +49,6 @@ export const isValid = (schema) => {
         if (error) {
             const errorMessage = error.details.map(detail => detail.message).join(', ');
             return next(new APPError(errorMessage, 400));
-
-            //return next(new APPError(error.details, 400))
         }
         next()
     }

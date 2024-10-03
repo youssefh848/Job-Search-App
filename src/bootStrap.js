@@ -1,4 +1,4 @@
-import { authRouter, companyRouter, userRouter } from "./modules/index.js";
+import { authRouter, companyRouter, jobRouter, userRouter } from "./modules/index.js";
 import { globalErrorHandling } from "./utils/appError.js";
 
 
@@ -9,6 +9,7 @@ export const bootStrap = (app, express) => {
     app.use('/auth', authRouter)
     app.use('/user', userRouter)
     app.use('/company', companyRouter)
+    app.use('/job', jobRouter)
     // global error 
     app.use(globalErrorHandling)
 }

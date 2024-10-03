@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt'
-import { User } from "../../../DB/index.js";
+import { Application, Company, Job, User } from "../../../DB/index.js";
 import { APPError } from "../../utils/appError.js";
 import { messages } from "../../utils/constant/messaeges.js";
 
@@ -62,6 +62,12 @@ export const deleteUser = async (req, res, next) => {
     if (!userdeleted) {
         return next(new APPError(messages.user.failToDelete, 500))
     }
+
+    // Delete related documents in other collections
+    await Application.deleteMany({ userId: authUserId }) // Delete applications related to the user
+    await Job.deleteMany({ addedBy: authUserId }) // Delete job related to the user
+    await Company.deleteMany({ companyHR: authUserId }) // Delete company related to the user
+
     // send res 
     return res.status(200).json({
         message: messages.user.deleted,

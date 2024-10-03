@@ -26,6 +26,15 @@ export const messages = {
         failToUpdatePassword: "fail To Update Password",
         noAccountsFound: "no accounts found",
     },
-    company: generateMessage('company')
-
+    company: {
+        ...generateMessage('company'),
+        userHaveCompany: "user have alearedy company"
+    },
+    job: {
+        ...generateMessage('job'),
+        createdApplication: "Application submitted successfully.",
+        alreadyApplied: "You have already applied for this job.",
+        failToApply: "Failed to submit your application.",
+    },
+    application: generateMessage('application')
 }

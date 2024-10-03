@@ -4,8 +4,8 @@ import { isAuthorized } from "../../middleware/authorization.js";
 import { roles } from "../../utils/constant/enums.js";
 import { isValid } from "../../middleware/validation.js";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
-import { addCompanyVal, deleteCompanyVal, getCompanyVal, searchCompanyByNameVal, updateCompanyVal } from "./company.validation.js";
-import { addCompany, deleteCompany, getCompany, searchCompanyByName, updateCompany } from "./company.controller.js";
+import { addCompanyVal, deleteCompanyVal, getApplicationJobVal, getCompanyVal, searchCompanyByNameVal, updateCompanyVal } from "./company.validation.js";
+import { addCompany, deleteCompany, getApplicationJob, getCompany, searchCompanyByName, updateCompany } from "./company.controller.js";
 
 const companyRouter = Router();
 
@@ -47,6 +47,14 @@ companyRouter.get('/search-company',
     isAuthorized([roles.COMPANY_HR, roles.USER]),
     isValid(searchCompanyByNameVal),
     asyncHandler(searchCompanyByName)
+)
+
+// Get all applications for specific Job
+companyRouter.get('/job-applications/:jobId',
+    isAuthenticated(),
+    isAuthorized([roles.COMPANY_HR]),
+    isValid(getApplicationJobVal),
+    asyncHandler(getApplicationJob)
 )
 
 export default companyRouter;

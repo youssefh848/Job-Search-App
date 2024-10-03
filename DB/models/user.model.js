@@ -64,13 +64,27 @@ const userSchema = new Schema({
 );
 
 // set username
-userSchema.pre('save', function (next) {
+userSchema.pre('save', async function (next) {
     if (!this.isModified('firstName') && !this.isModified('lastName')) {
-        return next();
+        return next()
     }
-    this.username = `${this.firstName}${this.lastName}`.toLowerCase(); // Create username from first and last name
-    next();
+    // Create initial username
+    let username = `${this.firstName}${this.lastName}`.toLowerCase()
+    // Check if username exists
+    let existingUser = await this.constructor.findOne({ username })
+
+    let suffix = 1;
+    // Loop until finding a unique username
+    while (existingUser) {
+        username = `${this.firstName}${this.lastName}${suffix}`.toLowerCase()
+        existingUser = await this.constructor.findOne({ username })
+        suffix++;
+    }
+    // Set the unique username
+    this.username = username
+    next()
 });
+
 
 
 // model
